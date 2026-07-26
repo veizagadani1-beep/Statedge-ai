@@ -1,0 +1,6 @@
+{
+  "name": "StatEdge AI",
+  "description": "Professional football statistics, match insights, team comparisons, league standings, and AI-powered match predictions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
