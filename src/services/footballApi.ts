@@ -141,7 +141,9 @@ export async function fetchTodayMatches(leagueId?: LeagueId | 'all'): Promise<Fe
     const res = await fetch(`/api/football/fixtures?${params.toString()}`);
     if (!res.ok) {
       const cached = getOfflineCache<Match[]>(cacheKey);
-      if (cached) return { success: true, matches: cached, todayDate };
+      if (cached && cached.length > 0) {
+  return { success: true, matches: cached, todayDate };
+}
       return {
         success: false,
         matches: [],
@@ -154,7 +156,9 @@ export async function fetchTodayMatches(leagueId?: LeagueId | 'all'): Promise<Fe
 
     if (json.apiConnected === false) {
       const cached = getOfflineCache<Match[]>(cacheKey);
-      if (cached) return { success: true, matches: cached, todayDate };
+      if (cached && cached.length > 0) {
+  return { success: true, matches: cached, todayDate };
+}
       return {
         success: false,
         matches: [],
@@ -180,7 +184,10 @@ export async function fetchTodayMatches(leagueId?: LeagueId | 'all'): Promise<Fe
     };
   } catch (err: any) {
     const cached = getOfflineCache<Match[]>(cacheKey);
-    if (cached) return { success: true, matches: cached, todayDate };
+    if (cached && cached.length > 0) {
+  return { success: true, matches: cached, todayDate };
+}
+    
     return {
       success: false,
       matches: [],
