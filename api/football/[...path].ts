@@ -22,102 +22,61 @@ export default {
           fixturesCount: 0,
           error: "API_FOOTBALL_KEY is not configured in Vercel",
         },
-        500,
+        500
       );
     }
 
     try {
       const incomingUrl = new URL(request.url);
-      const prefix = "/api/football/";
-      const path = incomingUrl.pathname.startsWith(prefix)
-        ? incomingUrl.pathname.slice(prefix.length)
-        : "";
 
-      /*
-       * La aplicación utiliza /api/football/health para comprobar
-       * que API-Football está conectada.
-       */
-      if (path === "health") {
-        const today = new Intl.DateTimeFormat("en-CA", {
-          timeZone: "Europe/Madrid",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).format(new Date());
+      // Obtiene fixtures, teams, standings, status, etc.
+      const endpoint = incomingUrl.pathname.replace(
+        /^\/api\/football\/?/,
+        ""
+      );
 
-        const apiResponse = await fetch(
-          `${API_BASE_URL}/fixtures?date=${encodeURIComponent(today)}`,
-          {
-            headers: {
-              "x-apisports-key": apiKey,
-              Accept: "application/json",
-            },
-          },
-        );
-
-        const data = await apiResponse.json();
-        const fixtures = Array.isArray(data?.response) ? data.response : [];
-
+      if (!endpoint) {
         return jsonResponse(
           {
-            connected: apiResponse.ok && !data?.errors?.length,
-            status: apiResponse.status,
-            fixturesCount: fixtures.length,
-            todayDate: today,
-            error: apiResponse.ok
-              ? null
-              : `API-Football returned HTTP ${apiResponse.status}`,
+            connected: false,
+            status: 400,
+            error: "Football API endpoint is missing",
           },
-          apiResponse.ok ? 200 : apiResponse.status,
+          400
         );
       }
 
-      if (!path) {
-        return jsonResponse(
-          {
-            error: "Missing API-Football endpoint",
-          },
-          400,
-        );
-      }
+      const targetUrl = new URL(`${API_BASE_URL}/${endpoint}`);
 
-      const targetUrl = new URL(`${API_BASE_URL}/${path}`);
-
+      // Copia únicamente los parámetros válidos.
+      // __path es un parámetro interno de Vercel y no debe enviarse.
       incomingUrl.searchParams.forEach((value, key) => {
-        targetUrl.searchParams.append(key, value);
+        if (key !== "__path" && key !== "...path") {
+          targetUrl.searchParams.append(key, value);
+        }
       });
 
       const apiResponse = await fetch(targetUrl.toString(), {
-        method: request.method,
+        method: "GET",
         headers: {
           "x-apisports-key": apiKey,
-          Accept: "application/json",
         },
       });
 
-      const body = await apiResponse.text();
+      const data = await apiResponse.json();
 
-      return new Response(body, {
-        status: apiResponse.status,
-        headers: {
-          "Content-Type":
-            apiResponse.headers.get("Content-Type") ??
-            "application/json; charset=utf-8",
-          "Cache-Control": "s-maxage=30, stale-while-revalidate=60",
-        },
-      });
+      return jsonResponse(data, apiResponse.status);
     } catch (error) {
       return jsonResponse(
         {
           connected: false,
           status: 500,
-          fixturesCount: 0,
           error:
             error instanceof Error
               ? error.message
-              : "Unknown API-Football proxy error",
+              : "Failed to contact API-Football",
         },
-        500,
+        500
       );
     }
   },
