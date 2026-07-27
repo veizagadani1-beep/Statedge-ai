@@ -114,7 +114,11 @@ export function normalizeApiMatch(item: any): Match {
       score: g.away ?? 0,
       form: [],
     },
-    venue: f.venue?.name ? `${f.venue.name}${f.venue.city ? `, ${f.venue.city}` : ''}` : 'Data not available',
+    venue: f.venue?.name
+  ? `${f.venue.name}${f.venue.city ? `, ${f.venue.city}` : ''}`
+  : league.name
+    ? `${league.name}${league.country ? ` · ${league.country}` : ''}`
+    : 'Estadio no informado',
     referee: f.referee || 'Not reported',
   };
 }
