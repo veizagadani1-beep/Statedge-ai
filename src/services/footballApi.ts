@@ -135,7 +135,7 @@ export async function fetchTodayMatches(leagueId?: LeagueId | 'all'): Promise<Fe
     params.append('date', todayDate);
     if (leagueId && leagueId !== 'all' && LEAGUE_TO_API_ID[leagueId]) {
       params.append('league', String(LEAGUE_TO_API_ID[leagueId]));
-      params.append('season', '2024');
+   params.append('season', '2026');
     }
 
     const res = await fetch(`/api/football/fixtures?${params.toString()}`);
